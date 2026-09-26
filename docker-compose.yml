@@ -1,0 +1,72 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: planora_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: sprintai
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - planora_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: planora_backend
+    restart: always
+    environment:
+      APP_NAME: Planora
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8080
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: sprintai
+      DB_USERNAME: root
+      DB_PASSWORD: ""
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - planora_net
+
+  ai_service:
+    build:
+      context: ./ai_service
+      dockerfile: Dockerfile
+    container_name: planora_ai_service
+    restart: always
+    environment:
+      GEMINI_API_KEY: ""
+    ports:
+      - "8000:8000"
+    networks:
+      - planora_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: planora_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - ai_service
+    networks:
+      - planora_net
+
+volumes:
+  db_data:
+
+networks:
+  planora_net:
+    driver: bridge

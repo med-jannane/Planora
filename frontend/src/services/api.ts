@@ -1,6 +1,6 @@
 import type { ProjectAnalysis, TeamMember } from '../types';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_AI_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : 'http://localhost:8000');
 
 export async function analyzeCahierDesCharges(
   projectName: string,
@@ -58,9 +58,9 @@ Vérifiez l'accessibilité des boutons et ajoutez des retours visuels (animation
 }
 
 function generateFallbackAnalysis(projectName: string, team: TeamMember[]): ProjectAnalysis {
-  const m1 = team[0] || { name: 'Sarah Mansouri', role: 'Frontend React' };
-  const m2 = team[1] || { name: 'Alexandre Mercier', role: 'Backend Laravel' };
-  const m3 = team[2] || { name: 'Mehdi Benali', role: 'UI/UX Designer' };
+  const m1 = team[0] || { name: 'Développeur Frontend', role: 'Frontend React' };
+  const m2 = team[1] || { name: 'Développeur Backend', role: 'Backend Laravel' };
+  const m3 = team[2] || { name: 'Designer UI/UX', role: 'UI/UX Designer' };
 
   return {
     project_name: projectName || 'Projet SprintAI',
@@ -126,14 +126,36 @@ function generateFallbackAnalysis(projectName: string, team: TeamMember[]): Proj
       },
       {
         id: 'US-106',
-        title: 'Notifications Emails & Alertes Automatiques',
-        module: 'Communication Team',
+        title: 'Gestion des Ressources, Devises & Planning des Congés',
+        module: 'Ressources & Budget',
+        priority: 'Moyenne',
+        story_points: 5,
+        estimated_hours: 12,
+        assigned_to: m2.name,
+        assigned_role: m2.role,
+        criteria: ['Choix des devises (MAD, EUR, USD)', 'Taux horaires et budget matériel', 'Gestion des congés']
+      },
+      {
+        id: 'US-107',
+        title: 'Espace Multi-Projets & Commutation Workspace',
+        module: 'Multi-Projets',
+        priority: 'Moyenne',
+        story_points: 5,
+        estimated_hours: 10,
+        assigned_to: m1.name,
+        assigned_role: m1.role,
+        criteria: ['Gestionnaire de projets multiples', 'Création et switch rapide de workspace', 'Sauvegarde locale & Synchro API']
+      },
+      {
+        id: 'US-108',
+        title: 'Notifications Emails & Optimisation Mobile PWA',
+        module: 'Mobile & Communication',
         priority: 'Moyenne',
         story_points: 5,
         estimated_hours: 10,
         assigned_to: m2.name,
         assigned_role: m2.role,
-        criteria: ['Email lors de l\'attribution d\'une tâche', 'Notification en direct dans l\'app', 'Alerte de retard de Sprint']
+        criteria: ['Notifications par email automatiques', 'Interface 100% Mobile & PWA', 'Mode hors-ligne']
       }
     ],
     tasks: [
@@ -205,13 +227,39 @@ function generateFallbackAnalysis(projectName: string, team: TeamMember[]): Proj
       {
         id: 'TSK-06',
         user_story_id: 'US-106',
+        title: 'Module Gestion des Ressources & Sélecteur de Devises',
+        assignee: m3.name,
+        role: m3.role,
+        estimated_hours: 10,
+        status: 'A faire',
+        sprint: 'Sprint 2',
+        gantt_start_day: 11,
+        duration_days: 3,
+        description: 'Mettre en place la configuration des devises (MAD, EUR, USD) et le suivi des matériels.'
+      },
+      {
+        id: 'TSK-07',
+        user_story_id: 'US-107',
+        title: 'Gestionnaire Multi-Projets & Commutation Instantanée',
+        assignee: m1.name,
+        role: m1.role,
+        estimated_hours: 10,
+        status: 'A faire',
+        sprint: 'Sprint 3',
+        gantt_start_day: 14,
+        duration_days: 3,
+        description: 'Création du dropdown de sélection des projets et persistance localStorage.'
+      },
+      {
+        id: 'TSK-08',
+        user_story_id: 'US-108',
         title: 'Mailing Laravel Mailables & Notifications Push',
         assignee: m2.name,
         role: m2.role,
         estimated_hours: 8,
         status: 'A faire',
         sprint: 'Sprint 3',
-        gantt_start_day: 14,
+        gantt_start_day: 15,
         duration_days: 2,
         description: 'Configurer l\'envoi automatique de mails aux membres lors de l\'attribution de tâches.'
       }

@@ -1,9 +1,32 @@
-﻿export interface TeamMember {
+export interface TeamMember {
   id: string;
+  user_code?: string;
   name: string;
   role: string;
+  functionalities?: string[];
   email: string;
   avatar: string;
+}
+
+export interface UserProfile {
+  id: string;
+  user_code: string; // Clef primaire / code identité (ex: USR-8942-PK)
+  name: string;
+  email: string;
+  functionalities: string[];
+  avatar: string;
+  isManager?: boolean;
+  country?: string;
+  language?: 'fr' | 'en' | 'es';
+}
+
+export interface ProjectRecord {
+  id: string;
+  code: string;
+  name: string;
+  createdAt: string;
+  analysis: ProjectAnalysis | null;
+  team: TeamMember[];
 }
 
 export interface UserStory {
@@ -62,3 +85,4 @@ export interface AppNotification {
   type: 'assignment' | 'sprint' | 'delay' | 'ai';
   read: boolean;
 }
+

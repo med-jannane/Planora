@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import type { TeamMember, Task } from '../types';
-import { Mail, Send, CheckCircle2, Key, Copy, GitBranch, GitCommit } from 'lucide-react';
+import { Mail, Send, CheckCircle2, Copy, GitBranch, Link, UserPlus, AlertTriangle, Key, ShieldCheck, GitCommit } from 'lucide-react';
 
 interface TeamNotificationsProps {
   teamMembers: TeamMember[];
   tasks: Task[];
   projectCode?: string;
   projectName?: string;
+  isManager?: boolean;
   onSendEmailNotification: (recipient: string, taskTitle: string) => void;
+  onAddMemberByCode?: (memberCode: string) => { success: boolean; message: string } | void;
 }
 
 export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
@@ -15,13 +17,21 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
   tasks,
   projectCode = 'SPRINT-8942',
   projectName = 'sprint',
+  isManager = false,
   onSendEmailNotification,
+  onAddMemberByCode,
 }) => {
-  const [sentNotice, setSentNotice] = useState<string | null>(null);
+  const [noticeMessage, setNoticeMessage] = useState<{ text: string; isError: boolean } | null>(null);
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  // Form states
   const [inviteEmail, setInviteEmail] = useState<string>('');
   const [inviteName, setInviteName] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
+
+  // Add by member user identity code state
+  const [inputMemberCode, setInputMemberCode] = useState<string>('');
 
   const getRoleColor = (role?: string) => {
     const r = (role || '').toLowerCase();
@@ -37,13 +47,37 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
     setTimeout(() => setCopiedCode(false), 3000);
   };
 
+  const handleCopyInvitationLink = () => {
+    const inviteUrl = `${window.location.origin}${window.location.pathname}?join=${projectCode}`;
+    navigator.clipboard.writeText(inviteUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 3000);
+  };
+
+  const handleAddByCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputMemberCode.trim()) return;
+
+    if (onAddMemberByCode) {
+      const res = onAddMemberByCode(inputMemberCode.trim());
+      if (res) {
+        setNoticeMessage({ text: res.message, isError: !res.success });
+        if (res.success) {
+          setInputMemberCode('');
+        }
+      }
+      setTimeout(() => setNoticeMessage(null), 6000);
+    }
+  };
+
   const handleSendInviteEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
 
     setIsSending(true);
+    const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8080` : 'http://localhost:8080');
     try {
-      const response = await fetch('http://localhost:8080/api/send-invitation', {
+      const response = await fetch(`${LARAVEL_API_URL}/api/send-invitation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -54,98 +88,140 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
         })
       });
       await response.json();
-      setSentNotice(`Invitation et Clef Primaire (${projectCode}) envoyées à ${inviteEmail} via Gmail (map45lap@gmail.com) !`);
+      setNoticeMessage({ text: `Invitation et Clef Primaire (${projectCode}) envoyées à ${inviteEmail} via Gmail (map45lap@gmail.com) !`, isError: false });
       setInviteEmail('');
       setInviteName('');
     } catch {
       onSendEmailNotification(inviteEmail.trim(), `Invitation au projet ${projectName} (Code: ${projectCode})`);
-      setSentNotice(`Invitation enregistrée pour ${inviteEmail} (Code: ${projectCode}) !`);
+      setNoticeMessage({ text: `Invitation enregistrée pour ${inviteEmail} (Code: ${projectCode}) !`, isError: false });
     } finally {
       setIsSending(false);
-      setTimeout(() => setSentNotice(null), 5000);
+      setTimeout(() => setNoticeMessage(null), 5000);
     }
   };
 
   const handleSendSingleEmail = (member: TeamMember) => {
     onSendEmailNotification(member.email, `Récapitulatif Sprints & Tâches - Code ${projectCode}`);
-    setSentNotice(`Email de récapitulatif envoyé à ${member.name} (${member.email}) !`);
-    setTimeout(() => setSentNotice(null), 4000);
+    setNoticeMessage({ text: `Email de récapitulatif envoyé à ${member.name} (${member.email}) !`, isError: false });
+    setTimeout(() => setNoticeMessage(null), 4000);
   };
 
   return (
     <div className="space-y-6 font-sans">
       {/* Top GitHub-Style Manager Profile & Primary Key Banner */}
-      <div className="p-5 rounded-2xl bg-[#191A23] text-white border-2 border-[#191A23] shadow-[5px_5px_0px_#191A23] space-y-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/20 pb-4">
+      <div className="p-6 rounded-3xl bg-[#191A23] text-white border-3 border-[#191A23] shadow-[8px_8px_0px_#191A23] space-y-5">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-white/20 pb-5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#B9FF66] text-[#191A23] border-2 border-[#191A23] flex items-center justify-center font-extrabold text-lg shadow-[2px_2px_0px_#191A23]">
-              👑
+            <div className="w-12 h-12 rounded-2xl bg-[#B9FF66] text-[#191A23] border-2 border-[#191A23] flex items-center justify-center font-extrabold text-xl shadow-[3px_3px_0px_#191A23]">
+              <ShieldCheck className="w-6 h-6 text-[#191A23]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-extrabold text-white">Profil Manager / Chef de Projet</h2>
+                <h2 className="text-lg font-extrabold text-white">Espace Manager & Intégration d'Équipe</h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#B9FF66] text-[#191A23] font-extrabold border border-[#191A23]">
-                  GitHub Organization Sync
+                  Code Projet: {projectCode}
                 </span>
               </div>
-              <p className="text-[11px] text-white/75 font-medium mt-0.5">
-                Projet: <strong className="text-[#B9FF66]">{projectName}</strong> • Service Mail: <strong className="text-[#38BDF8]">map45lap@gmail.com</strong>
+              <p className="text-xs text-white/75 font-medium mt-0.5">
+                Projet: <strong className="text-[#B9FF66]">{projectName}</strong> • Service Mail: <strong className="text-[#38BDF8]">Actif</strong>
               </p>
             </div>
           </div>
 
-          {/* Primary Key / Project Code Badge */}
-          <div className="flex items-center gap-2.5 bg-white/10 p-2.5 rounded-xl border border-white/20 shrink-0">
-            <div className="space-y-0.5">
-              <p className="text-[9px] font-extrabold text-[#B9FF66] uppercase tracking-wider flex items-center gap-1">
-                <Key className="w-3 h-3 text-[#B9FF66]" /> Clef Primaire (Code d'Équipe)
-              </p>
-              <p className="text-lg font-mono font-extrabold text-white tracking-widest">{projectCode}</p>
-            </div>
+          {/* Invitation Link & Code Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleCopyInvitationLink}
+              className="px-4 py-2 rounded-xl bg-[#38BDF8] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center gap-1.5 border-2 border-[#191A23] transition-all shadow-[3px_3px_0px_#191A23]"
+            >
+              <Link className="w-4 h-4" />
+              <span>{copiedLink ? 'Lien Copié !' : 'Générer / Copier Lien d\'Invitation'}</span>
+            </button>
+
             <button
               onClick={handleCopyCode}
-              className="px-3 py-1.5 rounded-lg bg-[#B9FF66] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center gap-1 border border-[#191A23] transition-all shadow-[2px_2px_0px_#191A23]"
+              className="px-4 py-2 rounded-xl bg-[#B9FF66] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center gap-1.5 border-2 border-[#191A23] transition-all shadow-[3px_3px_0px_#191A23]"
             >
-              <Copy className="w-3.5 h-3.5" />
-              <span>{copiedCode ? 'Copié !' : 'Copier'}</span>
+              <Copy className="w-4 h-4" />
+              <span>{copiedCode ? 'Code Copié !' : 'Copier Code Équipe'}</span>
             </button>
           </div>
         </div>
 
-        {/* Quick Email Invite Sender Form */}
-        <form onSubmit={handleSendInviteEmail} className="flex flex-col md:flex-row items-center gap-3 pt-1">
-          <span className="text-xs font-extrabold text-white/90 shrink-0 flex items-center gap-1.5">
-            <Mail className="w-4 h-4 text-[#B9FF66]" /> Inviter par Email :
-          </span>
-          <input
-            type="text"
-            placeholder="Nom du membre (ex: Alex)"
-            value={inviteName}
-            onChange={(e) => setInviteName(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-white text-[#191A23] text-xs font-bold border-2 border-[#191A23] focus:outline-none w-full md:w-44"
-          />
-          <input
-            type="email"
-            required
-            placeholder="Email du membre (ex: alex@gmail.com)"
-            value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-            className="px-3 py-1.5 rounded-xl bg-white text-[#191A23] text-xs font-bold border-2 border-[#191A23] focus:outline-none flex-1 w-full"
-          />
-          <button
-            type="submit"
-            disabled={isSending}
-            className="px-4 py-1.5 rounded-xl bg-[#B9FF66] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center gap-1.5 border-2 border-[#191A23] transition-all shrink-0 shadow-[2px_2px_0px_#191A23] active:translate-x-0.5 active:translate-y-0.5"
-          >
-            <Send className="w-3.5 h-3.5" />
-            <span>{isSending ? 'Envoi Gmail...' : 'Envoyer Clef & Invitation'}</span>
-          </button>
-        </form>
+        {/* 2 OPTIONS: ADD BY MEMBER CODE OR SEND EMAIL INVITATION */}
+        {isManager && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            
+            {/* OPTION 1: ADD MEMBER BY IDENTITY CODE */}
+            <form onSubmit={handleAddByCode} className="p-4 rounded-2xl bg-white/10 border-2 border-white/20 space-y-2">
+              <span className="text-xs font-extrabold text-[#B9FF66] uppercase tracking-wider flex items-center gap-1.5">
+                <UserPlus className="w-4 h-4 text-[#B9FF66]" /> 1. Ajouter un membre par son Code Identité
+              </span>
+              <p className="text-[11px] text-white/70">
+                Saisissez ou collez la clé primaire / code d'identité (ex: <code>USR-9482-PK</code>) transmis par le membre :
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: USR-9482-PK"
+                  value={inputMemberCode}
+                  onChange={(e) => setInputMemberCode(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-white text-[#191A23] text-xs font-mono font-extrabold border-2 border-[#191A23] focus:outline-none flex-1 uppercase"
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-[#B9FF66] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center gap-1 border-2 border-[#191A23] transition-all shadow-[2px_2px_0px_#191A23]"
+                >
+                  <span>Intégrer Membre</span>
+                </button>
+              </div>
+            </form>
+
+            {/* OPTION 2: EMAIL INVITE SENDER */}
+            <form onSubmit={handleSendInviteEmail} className="p-4 rounded-2xl bg-white/10 border-2 border-white/20 space-y-2">
+              <span className="text-xs font-extrabold text-[#38BDF8] uppercase tracking-wider flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-[#38BDF8]" /> 2. Inviter un Membre par Email
+              </span>
+              <p className="text-[11px] text-white/70">
+                Envoie un e-mail automatique contenant le code d'accès au projet :
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  required
+                  placeholder="Email (ex: alex@gmail.com)"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="px-3 py-2 rounded-xl bg-white text-[#191A23] text-xs font-bold border-2 border-[#191A23] focus:outline-none flex-1"
+                />
+                <button
+                  type="submit"
+                  disabled={isSending}
+                  className="px-4 py-2 rounded-xl bg-[#38BDF8] hover:bg-white text-[#191A23] font-extrabold text-xs flex items-center justify-center gap-1 border-2 border-[#191A23] transition-all shadow-[2px_2px_0px_#191A23]"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isSending ? 'Envoi...' : 'Envoyer Mail'}</span>
+                </button>
+              </div>
+            </form>
+
+          </div>
+        )}
       </div>
 
-      {sentNotice && (
-        <div className="p-3.5 rounded-xl bg-[#B9FF66] border-2 border-[#191A23] text-[#191A23] text-xs font-extrabold flex items-center gap-2 shadow-[3px_3px_0px_#191A23]">
-          <CheckCircle2 className="w-4 h-4 text-[#191A23]" /> {sentNotice}
+      {noticeMessage && (
+        <div className={`p-4 rounded-2xl border-2 border-[#191A23] text-xs font-extrabold flex items-center gap-2 shadow-[4px_4px_0px_#191A23] ${
+          noticeMessage.isError
+            ? 'bg-rose-100 text-rose-900 border-rose-900'
+            : 'bg-[#B9FF66] text-[#191A23]'
+        }`}>
+          {noticeMessage.isError ? (
+            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-900" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-[#191A23] shrink-0" />
+          )}
+          <span>{noticeMessage.text}</span>
         </div>
       )}
 
@@ -153,10 +229,10 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-extrabold text-[#191A23] flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-[#191A23]" /> Membres & Activité d'Équipe ({teamMembers.length})
+            <GitBranch className="w-4 h-4 text-[#191A23]" /> Membres de l'Équipe Projet ({teamMembers.length})
           </h3>
           <span className="text-[11px] font-mono font-extrabold text-[#191A23]/70">
-            Rejoints avec la Clef {projectCode}
+            Code d'Accès: {projectCode}
           </span>
         </div>
 
@@ -187,6 +263,30 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
                       {memberTasks.length} Tâches
                     </span>
                   </div>
+
+                  {/* Member identity code */}
+                  {member.user_code && (
+                    <div className="px-2.5 py-1 rounded-lg bg-[#F3F3F3] border border-[#191A23] text-[10px] font-mono font-extrabold text-[#191A23] flex items-center justify-between">
+                      <span>Clé: {member.user_code}</span>
+                      <Key className="w-3 h-3 text-[#191A23]" />
+                    </div>
+                  )}
+
+                  {/* Multi-selected functionalities */}
+                  {member.functionalities && member.functionalities.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-[#191A23]/60 font-extrabold uppercase flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3 text-[#191A23]" /> Compétences :
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        {member.functionalities.map((func, fIdx) => (
+                          <span key={fIdx} className="text-[9px] px-1.5 py-0.5 rounded bg-[#F3F3F3] text-[#191A23] border border-[#191A23] font-extrabold">
+                            {func}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="pt-2 border-t border-[#191A23]/20 space-y-1 text-xs">
                     <div className="flex items-center justify-between text-[#191A23]/70 font-bold">
@@ -231,5 +331,3 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
     </div>
   );
 };
-
-

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   FileUp, 
   Sparkles, 
@@ -11,6 +11,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import type { TeamMember } from '../types';
+import { findUserByCode } from '../utils/userRegistry';
 
 interface UploadProps {
   onAnalyze: (projectName: string, specText: string, team: TeamMember[], file: File | null) => void;
@@ -23,29 +24,42 @@ export const CahierDesChargesUpload: React.FC<UploadProps> = ({ onAnalyze, isLoa
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    { id: '1', name: 'Sarah Mansouri', role: 'Développeuse Frontend React / PWA', email: 'sarah@projet.com', avatar: '👩‍💻' },
-    { id: '2', name: 'Alexandre Mercier', role: 'Développeur Backend Laravel & API MySQL', email: 'alexandre@projet.com', avatar: '👨‍💻' },
-    { id: '3', name: 'Mehdi Benali', role: 'UI/UX Designer & PWA Mobile Specialist', email: 'mehdi@projet.com', avatar: '🎨' },
-  ]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
-  const [newMemberName, setNewMemberName] = useState('');
-  const [newMemberRole, setNewMemberRole] = useState('Développeur Fullstack');
-  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberCode, setNewMemberCode] = useState('');
+  const [memberCodeError, setMemberCodeError] = useState<string | null>(null);
+  const [memberCodeNotice, setMemberCodeNotice] = useState<string | null>(null);
 
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMemberName.trim()) return;
-    const newMember: TeamMember = {
-      id: Date.now().toString(),
-      name: newMemberName.trim(),
-      role: newMemberRole,
-      email: newMemberEmail.trim() || `${newMemberName.toLowerCase().replace(/\s+/g, '')}@projet.com`,
-      avatar: '👤'
-    };
-    setTeamMembers([...teamMembers, newMember]);
-    setNewMemberName('');
-    setNewMemberEmail('');
+    setMemberCodeError(null);
+    setMemberCodeNotice(null);
+
+    const cleanCode = newMemberCode.trim().toUpperCase();
+    if (!cleanCode) {
+      setMemberCodeError("Veuillez saisir un code d'identité (ex: USR-8942-PK).");
+      return;
+    }
+
+    const foundUser = findUserByCode(cleanCode);
+    if (!foundUser) {
+      setMemberCodeError(`❌ Code d'identité invalide ("${cleanCode}") : Aucun utilisateur n'a été trouvé avec ce code.`);
+      return;
+    }
+
+    const exists = teamMembers.some(
+      m => (m.user_code && m.user_code.toUpperCase() === cleanCode) || m.email.toLowerCase() === foundUser.email.toLowerCase()
+    );
+
+    if (exists) {
+      setMemberCodeError(`⚠️ Le membre ${foundUser.name} (${foundUser.user_code || cleanCode}) est déjà dans l'équipe.`);
+      return;
+    }
+
+    setTeamMembers(prev => [...prev, foundUser]);
+    setMemberCodeNotice(`✅ ${foundUser.name} (${foundUser.role}) ajouté à l'équipe !`);
+    setNewMemberCode('');
+    setTimeout(() => setMemberCodeNotice(null), 4000);
   };
 
   const handleRemoveMember = (id: string) => {
@@ -75,7 +89,7 @@ export const CahierDesChargesUpload: React.FC<UploadProps> = ({ onAnalyze, isLoa
       <div className="p-8 rounded-[35px] bg-[#F3F3F3] border-2 border-[#191A23] shadow-[6px_6px_0px_#191A23] relative overflow-hidden">
         <div className="relative z-10 max-w-2xl">
           <div className="inline-block bg-[#B9FF66] text-[#191A23] text-xs font-extrabold px-3.5 py-1 rounded-md border border-[#191A23] mb-3">
-            <Sparkles className="w-3.5 h-3.5 inline mr-1" /> Agent IA Génératif de Projet
+            <Sparkles className="w-3.5 h-3.5 inline mr-1" /> Analyse Intelligente Planora
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-[#191A23]">
             Soumettre le Cahier des Charges & L'Équipe
@@ -169,54 +183,71 @@ export const CahierDesChargesUpload: React.FC<UploadProps> = ({ onAnalyze, isLoa
 
             {/* Member List */}
             <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-3 rounded-2xl bg-[#F3F3F3] border-2 border-[#191A23] text-xs">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <span className="text-lg">{member.avatar}</span>
-                    <div className="truncate">
-                      <p className="font-extrabold text-[#191A23] truncate">{member.name}</p>
-                      <p className="text-[10px] text-[#191A23]/70 font-bold truncate">{member.role}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMember(member.id)}
-                    className="p-1 text-[#191A23] hover:text-rose-600 font-extrabold"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+              {teamMembers.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-[#F3F3F3] border-2 border-dashed border-[#191A23]/30 text-center space-y-1">
+                  <p className="text-xs text-[#191A23]/70 font-extrabold">Aucun membre dans l'équipe</p>
+                  <p className="text-[10px] text-[#191A23]/50 font-bold">Ajoutez des collaborateurs avec leur Code Identité ci-dessous.</p>
                 </div>
-              ))}
+              ) : (
+                teamMembers.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between p-3 rounded-2xl bg-[#F3F3F3] border-2 border-[#191A23] text-xs">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <span className="text-lg">{member.avatar}</span>
+                      <div className="truncate">
+                        <p className="font-extrabold text-[#191A23] truncate">{member.name}</p>
+                        <p className="text-[10px] text-[#191A23]/70 font-bold truncate">{member.role}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMember(member.id)}
+                      className="p-1 text-[#191A23] hover:text-rose-600 font-extrabold"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
 
-            {/* Add Member Form */}
-            <div className="pt-3 border-t-2 border-[#191A23] space-y-2.5">
-              <input
-                type="text"
-                placeholder="Nom du membre"
-                value={newMemberName}
-                onChange={(e) => setNewMemberName(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-[#191A23] text-xs font-bold text-[#191A23] focus:outline-none"
-              />
-              <select
-                value={newMemberRole}
-                onChange={(e) => setNewMemberRole(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-[#191A23] text-xs font-bold text-[#191A23] focus:outline-none"
-              >
-                <option value="Développeur Frontend React / PWA">Frontend React / PWA</option>
-                <option value="Développeur Backend Laravel / MySQL">Backend Laravel / MySQL</option>
-                <option value="UI/UX Designer">UI/UX Designer</option>
-                <option value="Développeur Mobile Native / Expo">Mobile React Native / Expo</option>
-                <option value="DevOps & Cloud">DevOps & Cloud</option>
-                <option value="QA / Tester">QA / Tester</option>
-              </select>
-              <button
-                type="button"
-                onClick={handleAddMember}
-                className="w-full py-2.5 rounded-xl bg-[#F3F3F3] hover:bg-[#B9FF66] text-[#191A23] border-2 border-[#191A23] text-xs font-extrabold flex items-center justify-center gap-1 transition-colors"
-              >
-                <Plus className="w-4 h-4" /> Ajouter à l'équipe
-              </button>
+            {/* Add Member Form by Identity Code */}
+            <div className="pt-3 border-t-2 border-[#191A23] space-y-2">
+              <label className="block text-[11px] font-extrabold text-[#191A23]">
+                Ajouter par Code Identité (ex: USR-8942-PK)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Ex: USR-8942-PK"
+                  value={newMemberCode}
+                  onChange={(e) => {
+                    setNewMemberCode(e.target.value);
+                    setMemberCodeError(null);
+                  }}
+                  className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#191A23] text-xs font-mono font-extrabold text-[#191A23] uppercase focus:outline-none focus:bg-[#F3F3F3]"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddMember}
+                  className="px-4 py-2 rounded-xl bg-[#F3F3F3] hover:bg-[#B9FF66] text-[#191A23] border-2 border-[#191A23] text-xs font-extrabold flex items-center justify-center gap-1 transition-colors shrink-0"
+                >
+                  <Plus className="w-4 h-4" /> Ajouter
+                </button>
+              </div>
+
+              {memberCodeError && (
+                <div className="p-2.5 rounded-xl bg-rose-100 border-2 border-rose-900 text-rose-900 text-[11px] font-extrabold flex items-center gap-1.5 shadow-[2px_2px_0px_#191A23]">
+                  <AlertTriangle className="w-4 h-4 shrink-0 text-rose-900" />
+                  <span>{memberCodeError}</span>
+                </div>
+              )}
+
+              {memberCodeNotice && (
+                <div className="p-2.5 rounded-xl bg-[#B9FF66] border-2 border-[#191A23] text-[#191A23] text-[11px] font-extrabold flex items-center gap-1.5 shadow-[2px_2px_0px_#191A23]">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-[#191A23]" />
+                  <span>{memberCodeNotice}</span>
+                </div>
+              )}
             </div>
           </div>
 

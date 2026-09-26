@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  Sparkles, 
   Bot, 
   Kanban, 
   Users, 
@@ -30,18 +29,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Top Header Navbar */}
       <header className="h-20 border-b-2 border-[#191A23] px-4 md:px-8 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-50">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#191A23] text-[#B9FF66] border-2 border-[#191A23] flex items-center justify-center shadow-[2px_2px_0px_#191A23]">
-            <Sparkles className="w-5 h-5 text-[#B9FF66]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl tracking-tight text-[#191A23]">SprintAI</span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-[#B9FF66] text-[#191A23] border border-[#191A23]">
-                Web & Mobile PWA
-              </span>
-            </div>
-            <p className="text-[11px] font-bold text-[#191A23]/60 hidden sm:block">
-              La plateforme Agile propulsée par l'Intelligence Artificielle
+          <img src="/logo.png" alt="Planora" className="h-10 w-auto object-contain" />
+          <div className="hidden sm:block border-l-2 border-[#191A23] pl-3">
+            <p className="text-[11px] font-bold text-[#191A23]/70">
+              La plateforme Agile de gestion de projet assistée par IA
             </p>
           </div>
         </div>
@@ -79,11 +70,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-[#191A23] leading-tight tracking-tight">
-            Transformez vos <span className="bg-[#B9FF66] px-2 py-0.5 rounded-lg border-2 border-[#191A23] shadow-[3px_3px_0px_#191A23]">Cahiers des Charges</span> en Sprints & Kanban avec l'IA.
+            Transformez vos <span className="bg-[#B9FF66] px-2 py-0.5 rounded-lg border-2 border-[#191A23] shadow-[3px_3px_0px_#191A23]">Cahiers des Charges</span> en Sprints & Kanban.
           </h1>
 
           <p className="text-sm md:text-base text-[#191A23]/80 font-bold leading-relaxed">
-            Déposez votre document PDF ou Word. Notre Agent IA (Google Gemini) analyse votre cahier des charges, extrait les User Stories, calcule les estimations de temps et attribue automatiquement les tâches à votre équipe avec un Code de Projet unique !
+            Déposez votre document PDF ou Word. Planora analyse votre cahier des charges, extrait les User Stories, calcule les estimations de temps et attribue automatiquement les tâches à votre équipe avec un Code de Projet unique !
           </p>
 
           {/* Action Buttons */}
@@ -105,9 +96,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Highlights */}
           <div className="pt-4 flex flex-wrap items-center gap-6 text-xs font-extrabold text-[#191A23]">
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> Aucune CB requise</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> PWA iOS & Android</span>
-            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> Laravel & MySQL API</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> Aucune carte bancaire requise</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> Diagramme de Gantt interactif</span>
+            <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-[#B9FF66] bg-[#191A23] rounded-full" /> Collaboration d'Équipe en temps réel</span>
           </div>
         </div>
 
@@ -120,7 +111,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-3 h-3 rounded-full bg-[#4ADE80] border border-[#191A23]" />
             </div>
             <span className="text-[10px] font-mono font-extrabold bg-white px-2 py-0.5 rounded border border-[#191A23]">
-              Aperçu SprintAI WorkSpace
+              Aperçu Espace Planora
             </span>
           </div>
 
@@ -131,7 +122,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
             <div>
               <span className="bg-[#191A23] text-[#B9FF66] font-mono text-[10px] px-1.5 py-0.2 rounded font-extrabold">
-                Agent IA Analyse PDF
+                Analyse Intelligente PDF / DOCX
               </span>
               <h4 className="text-xs font-extrabold text-[#191A23] mt-1">Découpage instantané en User Stories & Tâches</h4>
               <p className="text-[11px] text-[#191A23]/75 font-medium mt-0.5">Toutes les tâches démarrées avec le statut "À faire".</p>
@@ -154,7 +145,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Floating Badge */}
           <div className="absolute -bottom-4 -right-4 bg-[#B9FF66] text-[#191A23] font-extrabold p-3 rounded-2xl border-2 border-[#191A23] shadow-[4px_4px_0px_#191A23] text-xs flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-[#191A23]" /> Base MySQL & API Laravel Securisées
+            <ShieldCheck className="w-5 h-5 text-[#191A23]" /> Données Chiffrées & Espace Sécurisé
           </div>
         </div>
       </section>
@@ -178,7 +169,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-12 h-12 rounded-xl bg-[#B9FF66] border-2 border-[#191A23] flex items-center justify-center text-[#191A23]">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-extrabold text-[#191A23]">Analyse PDF & Docx Intelligent</h3>
+              <h3 className="text-base font-extrabold text-[#191A23]">Analyse PDF & Word</h3>
               <p className="text-xs text-[#191A23]/80 font-medium leading-relaxed">
                 Importez votre cahier des charges. L'IA lit et extrait automatiquement les modules, les User Stories, les critères d'acceptation et les estimations d'heures.
               </p>
@@ -189,7 +180,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-12 h-12 rounded-xl bg-[#38BDF8] border-2 border-[#191A23] flex items-center justify-center text-[#191A23]">
                 <Kanban className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-extrabold text-[#191A23]">Kanban & Gantt Découpés</h3>
+              <h3 className="text-base font-extrabold text-[#191A23]">Kanban & Gantt Interactifs</h3>
               <p className="text-xs text-[#191A23]/80 font-medium leading-relaxed">
                 Visualisez vos Sprints sur un Kanban interactif et un diagramme de Gantt avec barres chronologiques. Toutes les tâches démarrent à l'état "À faire".
               </p>
@@ -200,7 +191,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-12 h-12 rounded-xl bg-[#C084FC] border-2 border-[#191A23] flex items-center justify-center text-[#191A23]">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-extrabold text-[#191A23]">Code d'Équipe & Notifications Mails</h3>
+              <h3 className="text-base font-extrabold text-[#191A23]">Code d'Équipe & Notification Email</h3>
               <p className="text-xs text-[#191A23]/80 font-medium leading-relaxed">
                 Le Manager reçoit un code unique pour inviter son équipe. Les notifications par email sont envoyées automatiquement à chaque membre pour le suivi.
               </p>
@@ -211,7 +202,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Footer CTA */}
       <footer className="py-12 px-4 md:px-8 text-center space-y-4 max-w-4xl mx-auto">
-        <h3 className="text-2xl font-extrabold text-[#191A23]">Prêt à lancer votre projet avec SprintAI ?</h3>
+        <h3 className="text-2xl font-extrabold text-[#191A23]">Prêt à lancer votre projet avec Planora ?</h3>
         <p className="text-xs font-bold text-[#191A23]/70">Créez votre profil Manager ou rejoignez une équipe avec un code d'invitation.</p>
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
