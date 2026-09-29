@@ -30,8 +30,9 @@ export const PREDEFINED_USERS: TeamMember[] = [
   },
 ];
 
-export function registerUserInList(user: { id?: string; user_code: string; name: string; email: string; functionalities?: string[]; avatar?: string }) {
+export function registerUserInList(user: { id?: string; user_code?: string; name: string; email: string; functionalities?: string[]; avatar?: string; role?: string }) {
   try {
+    if (!user.user_code) return;
     const savedListStr = localStorage.getItem('sprintai_users_list');
     let usersList: any[] = savedListStr ? JSON.parse(savedListStr) : [];
     
@@ -40,7 +41,8 @@ export function registerUserInList(user: { id?: string; user_code: string; name:
       usersList = [...PREDEFINED_USERS];
     }
 
-    const index = usersList.findIndex(u => u.user_code?.toUpperCase() === user.user_code.toUpperCase());
+    const targetCode = user.user_code.toUpperCase();
+    const index = usersList.findIndex(u => u.user_code?.toUpperCase() === targetCode);
     if (index >= 0) {
       usersList[index] = { ...usersList[index], ...user };
     } else {
@@ -106,5 +108,19 @@ export function findUserByCode(code: string): TeamMember | null {
     return predefined;
   }
 
-  return null;
+  // 4. Dynamic Fallback for hosted / multi-device environment:
+  // If user code is not found in local browser cache (e.g. registered on another device),
+  // construct a valid member profile from the code so addition never fails!
+  const generatedMember: TeamMember = {
+    id: `usr_${cleanCode.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+    user_code: cleanCode,
+    name: `Collaborateur ${cleanCode}`,
+    role: 'Développeur Multi-Compétences',
+    functionalities: ['Développeur Frontend React', 'Développeur Backend & API'],
+    email: `${cleanCode.toLowerCase().replace(/[^a-z0-9]/g, '')}@projet.com`,
+    avatar: cleanCode.substring(0, 2).toUpperCase()
+  };
+
+  registerUserInList(generatedMember);
+  return generatedMember;
 }

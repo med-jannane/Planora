@@ -13,16 +13,26 @@ Route::post('/send-invitation', function (\Illuminate\Http\Request $request) {
     $projectCode = $request->input('project_code', 'SPRINT-8942');
     $projectName = $request->input('project_name', 'sprint');
 
+    $appUrl = $request->input('app_url');
+    if (!$appUrl) {
+        $origin = $request->header('origin') ?: $request->header('referer');
+        if ($origin) {
+            $appUrl = rtrim($origin, '/') . '/?join=' . $projectCode;
+        } else {
+            $appUrl = config('app.url', 'http://localhost') . '/?join=' . $projectCode;
+        }
+    }
+
     if (!$email) {
         return response()->json(['status' => 'error', 'message' => 'Email requis'], 400);
     }
 
     try {
         \Illuminate\Support\Facades\Mail::raw(
-            "Bonjour {$name},\n\nVous avez été invité(e) par le Manager à rejoindre le projet \"{$projectName}\" sur SprintAI !\n\n🔑 Votre Code d'Équipe (Clef Primaire) : {$projectCode}\n\nRejoignez l'espace de travail sur l'application Web & Mobile PWA :\nhttp://127.0.0.1:5173/\n\nCordialement,\nL'équipe SprintAI",
+            "Bonjour {$name},\n\nVous avez été invité(e) par le Manager à rejoindre le projet \"{$projectName}\" sur Planora !\n\n🔑 Votre Code d'Équipe (Clef Primaire) : {$projectCode}\n\nRejoignez l'espace de travail sur l'application Web & Mobile PWA via ce lien direct :\n{$appUrl}\n\nCordialement,\nL'équipe Planora",
             function ($message) use ($email, $projectName) {
                 $message->to($email)
-                        ->subject("🔑 Invitation au Projet \"{$projectName}\" - Code d'Équipe SprintAI");
+                        ->subject("🔑 Invitation au Projet \"{$projectName}\" - Code d'Équipe Planora");
             }
         );
         return response()->json(['status' => 'success', 'message' => "Email d'invitation envoyé à {$email}"]);

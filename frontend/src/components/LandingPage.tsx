@@ -10,7 +10,9 @@ import {
   CheckCircle2,
   FileText,
   ShieldCheck,
-  Zap
+  Zap,
+  Smartphone,
+  Download
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -39,6 +41,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         {/* Right CTA Actions */}
         <div className="flex items-center gap-3">
+          <a
+            href="/Planora-v1.0.apk"
+            download="Planora-v1.0.apk"
+            className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#B9FF66] hover:bg-[#a3f448] text-[#191A23] border-2 border-[#191A23] font-extrabold text-xs transition-all shadow-[2px_2px_0px_#191A23]"
+          >
+            <Smartphone className="w-4 h-4 text-[#191A23]" /> App Mobile (APK)
+          </a>
+
           <button
             onClick={onJoinWithCode}
             className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#F3F3F3] text-[#191A23] border-2 border-[#191A23] font-extrabold text-xs transition-all shadow-[2px_2px_0px_#191A23]"
@@ -78,19 +88,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </p>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
             <button
               onClick={onStartAsManager}
-              className="px-6 py-3.5 rounded-2xl bg-[#191A23] text-[#B9FF66] hover:bg-[#B9FF66] hover:text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all active:translate-x-0.5 active:translate-y-0.5"
+              className="px-5 py-3 rounded-2xl bg-[#191A23] text-[#B9FF66] hover:bg-[#B9FF66] hover:text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
-              Créer mon Projet Manager <ArrowRight className="w-5 h-5" />
+              Créer mon Projet <ArrowRight className="w-5 h-5" />
             </button>
+
+            <a
+              href="/Planora-v1.0.apk"
+              download="Planora-v1.0.apk"
+              className="px-5 py-3 rounded-2xl bg-[#B9FF66] hover:bg-[#a3f448] text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all"
+            >
+              <Smartphone className="w-5 h-5 text-[#191A23]" /> Télécharger APK <Download className="w-4 h-4" />
+            </a>
 
             <button
               onClick={onJoinWithCode}
-              className="px-6 py-3.5 rounded-2xl bg-white hover:bg-[#F3F3F3] text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all"
+              className="px-5 py-3 rounded-2xl bg-white hover:bg-[#F3F3F3] text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all"
             >
-              <Key className="w-5 h-5 text-[#191A23]" /> Rejoindre avec un Code
+              <Key className="w-5 h-5 text-[#191A23]" /> Code d'Équipe
             </button>
           </div>
 

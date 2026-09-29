@@ -84,7 +84,8 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
           email: inviteEmail.trim(),
           name: inviteName.trim() || 'Collaborateur',
           project_code: projectCode,
-          project_name: projectName
+          project_name: projectName,
+          app_url: `${window.location.origin}${window.location.pathname}?join=${projectCode}`
         })
       });
       await response.json();

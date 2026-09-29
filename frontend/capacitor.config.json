@@ -1,0 +1,9 @@
+{
+  "appId": "com.planora.app",
+  "appName": "Planora - SprintAI",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

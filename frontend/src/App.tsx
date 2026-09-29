@@ -122,10 +122,51 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     const codeFromUrl = params.get('join');
     if (codeFromUrl) {
-      setJoinProjectCode(codeFromUrl.toUpperCase());
-      setProjectCode(codeFromUrl.toUpperCase());
+      const formattedCode = codeFromUrl.toUpperCase();
+      setJoinProjectCode(formattedCode);
+      setProjectCode(formattedCode);
+
+      setProjects(prev => {
+        const match = prev.find(p => p.code === formattedCode);
+        if (!match) {
+          const newPrj: ProjectRecord = {
+            id: formattedCode,
+            code: formattedCode,
+            name: `Projet ${formattedCode}`,
+            createdAt: new Date().toLocaleDateString(),
+            analysis: null,
+            team: currentUser ? [{
+              id: currentUser.id,
+              user_code: currentUser.user_code,
+              name: currentUser.name,
+              role: currentUser.functionalities[0] || 'Développeur',
+              email: currentUser.email,
+              avatar: currentUser.avatar
+            }] : []
+          };
+          const updated = [newPrj, ...prev];
+          localStorage.setItem('sprintai_projects', JSON.stringify(updated));
+          return updated;
+        } else {
+          if (currentUser) {
+            const alreadyIn = match.team?.some(m => m.email === currentUser.email || m.user_code === currentUser.user_code);
+            if (!alreadyIn) {
+              const updatedTeam = [{
+                id: currentUser.id,
+                user_code: currentUser.user_code,
+                name: currentUser.name,
+                role: currentUser.functionalities[0] || 'Développeur',
+                email: currentUser.email,
+                avatar: currentUser.avatar
+              }, ...(match.team || [])];
+              return prev.map(p => p.code === formattedCode ? { ...p, team: updatedTeam } : p);
+            }
+          }
+        }
+        return prev;
+      });
     }
-  }, []);
+  }, [currentUser]);
 
   const handleLoginSuccess = (profile: UserProfile) => {
     setCurrentUser(profile);
@@ -147,6 +188,32 @@ export function App() {
 
     if (joinProjectCode) {
       setProjectCode(joinProjectCode);
+      setProjects(prev => {
+        const match = prev.find(p => p.code === joinProjectCode);
+        if (!match) {
+          const newPrj: ProjectRecord = {
+            id: joinProjectCode,
+            code: joinProjectCode,
+            name: `Projet ${joinProjectCode}`,
+            createdAt: new Date().toLocaleDateString(),
+            analysis: null,
+            team: [{
+              id: profile.id,
+              user_code: profile.user_code,
+              name: profile.name,
+              role: profile.functionalities[0] || 'Développeur',
+              functionalities: profile.functionalities,
+              email: profile.email,
+              avatar: profile.avatar || profile.name.charAt(0).toUpperCase()
+            }]
+          };
+          const updated = [newPrj, ...prev];
+          localStorage.setItem('sprintai_projects', JSON.stringify(updated));
+          return updated;
+        }
+        return prev;
+      });
+
       const newNotif: AppNotification = {
         id: Date.now().toString(),
         title: 'Intégré via Lien d\'Invitation',
@@ -186,16 +253,30 @@ export function App() {
     if (alreadyInTeam) {
       return {
         success: false,
-        message: `⚠️ Le membre ${foundUser.name} (${foundUser.user_code}) fait déjà partie de l'équipe.`
+        message: `⚠️ Le membre ${foundUser.name} (${foundUser.user_code || formattedCode}) fait déjà partie de l'équipe.`
       };
     }
 
     setTeam(prev => [foundUser, ...prev]);
 
+    // Sync to backend Laravel API if reachable
+    const LARAVEL_API_URL = import.meta.env.VITE_LARAVEL_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8080` : 'http://localhost:8080');
+    fetch(`${LARAVEL_API_URL}/api/team-members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: foundUser.name,
+        role: foundUser.role,
+        email: foundUser.email,
+        avatar: foundUser.avatar,
+        is_owner: false
+      })
+    }).catch(err => console.warn('Laravel DB save skipped:', err));
+
     const newNotif: AppNotification = {
       id: Date.now().toString(),
       title: 'Membre Intégré par Code',
-      message: `Membre réel ${foundUser.name} (${foundUser.user_code} - ${foundUser.role}) ajouté à l'équipe du projet ${projectCode}.`,
+      message: `Membre ${foundUser.name} (${foundUser.user_code || formattedCode} - ${foundUser.role}) ajouté à l'équipe du projet ${projectCode}.`,
       recipient: 'Manager',
       timestamp: 'À l\'instant',
       type: 'assignment',
