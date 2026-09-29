@@ -17,13 +17,11 @@ import {
 
 interface LandingPageProps {
   onStartAsManager: () => void;
-  onJoinWithCode: () => void;
   onLogin: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onStartAsManager,
-  onJoinWithCode,
   onLogin,
 }) => {
   return (
@@ -44,17 +42,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <a
             href="/Planora-v1.0.apk"
             download="Planora-v1.0.apk"
-            className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#B9FF66] hover:bg-[#a3f448] text-[#191A23] border-2 border-[#191A23] font-extrabold text-xs transition-all shadow-[2px_2px_0px_#191A23]"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#B9FF66] hover:bg-[#a3f448] text-[#191A23] border-2 border-[#191A23] font-extrabold text-xs transition-all shadow-[2px_2px_0px_#191A23]"
           >
-            <Smartphone className="w-4 h-4 text-[#191A23]" /> App Mobile (APK)
+            <Smartphone className="w-4 h-4 text-[#191A23]" /> Télécharger App APK
           </a>
-
-          <button
-            onClick={onJoinWithCode}
-            className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#F3F3F3] text-[#191A23] border-2 border-[#191A23] font-extrabold text-xs transition-all shadow-[2px_2px_0px_#191A23]"
-          >
-            <Key className="w-4 h-4 text-[#191A23]" /> Code d'Équipe
-          </button>
 
           <button
             onClick={onLogin}
@@ -103,13 +94,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <Smartphone className="w-5 h-5 text-[#191A23]" /> Télécharger APK <Download className="w-4 h-4" />
             </a>
-
-            <button
-              onClick={onJoinWithCode}
-              className="px-5 py-3 rounded-2xl bg-white hover:bg-[#F3F3F3] text-[#191A23] border-2 border-[#191A23] font-extrabold text-sm flex items-center justify-center gap-2 shadow-[4px_4px_0px_#191A23] transition-all"
-            >
-              <Key className="w-5 h-5 text-[#191A23]" /> Code d'Équipe
-            </button>
           </div>
 
           {/* Highlights */}

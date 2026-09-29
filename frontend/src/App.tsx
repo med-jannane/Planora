@@ -432,10 +432,6 @@ export function App() {
           setAuthInitialMode('register');
           setUnauthScreen('auth');
         }}
-        onJoinWithCode={() => {
-          setAuthInitialMode('register');
-          setUnauthScreen('auth');
-        }}
         onLogin={() => {
           setAuthInitialMode('login');
           setUnauthScreen('auth');
