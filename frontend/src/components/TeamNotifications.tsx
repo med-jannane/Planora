@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import type { TeamMember, Task } from '../types';
 import { Mail, Send, CheckCircle2, Copy, GitBranch, Link, UserPlus, AlertTriangle, Key, ShieldCheck, GitCommit } from 'lucide-react';
 
+import { copyToClipboard } from '../utils/clipboard';
+
 interface TeamNotificationsProps {
   teamMembers: TeamMember[];
   tasks: Task[];
@@ -41,15 +43,15 @@ export const TeamNotifications: React.FC<TeamNotificationsProps> = ({
     return 'bg-[#FACC15] text-[#191A23]';
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(projectCode);
+  const handleCopyCode = async () => {
+    await copyToClipboard(projectCode);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 3000);
   };
 
-  const handleCopyInvitationLink = () => {
+  const handleCopyInvitationLink = async () => {
     const inviteUrl = `${window.location.origin}${window.location.pathname}?join=${projectCode}`;
-    navigator.clipboard.writeText(inviteUrl);
+    await copyToClipboard(inviteUrl);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 3000);
   };

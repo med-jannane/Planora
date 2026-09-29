@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Key, Copy, CheckCircle2, ShieldCheck, Mail, Sparkles, Layers } from 'lucide-react';
 import type { UserProfile } from '../types';
+import { copyToClipboard } from '../utils/clipboard';
 
 interface ProfileViewProps {
   user: UserProfile;
@@ -11,8 +12,8 @@ interface ProfileViewProps {
 export const ProfileView: React.FC<ProfileViewProps> = ({ user, projectCode, onLogout }) => {
   const [copiedCode, setCopiedCode] = useState(false);
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(user.user_code);
+  const handleCopyCode = async () => {
+    await copyToClipboard(user.user_code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 3000);
   };
